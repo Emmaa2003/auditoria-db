@@ -30,6 +30,7 @@ public class AdminCatalogoController {
         model.addAttribute("controles", catalogoService.listarControles());
         return "admin/catalogo";
     }
+    //
 
     @GetMapping("/{id}")
     public String detalle(@PathVariable Integer id, Model model) {
