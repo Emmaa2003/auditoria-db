@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Organizaciones')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Organizaciones</h1>
+        <a th:href="@{/organizaciones/nueva}" class="btn btn-primary">+ Nueva organización</a>
+    </div>
+
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Área evaluada</th>
+                    <th>Administrador BD</th>
+                    <th>Fecha de registro</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="org : ${organizaciones}">
+                    <td th:text="${org.nombre}"></td>
+                    <td th:text="${org.areaEvaluada}"></td>
+                    <td th:text="${org.administradorBd} ?: '—'"></td>
+                    <td th:text="${#temporals.format(org.fechaRegistro, 'dd/MM/yyyy')}"></td>
+                    <td class="text-end">
+                        <a th:href="@{/organizaciones/{id}/historial(id=${org.idOrganizacion})}" class="btn btn-sm btn-outline-secondary">Historial</a>
+                        <a th:href="@{/organizaciones/{id}/editar(id=${org.idOrganizacion})}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(organizaciones)}">
+                    <td colspan="5" class="text-center text-muted py-4">No hay organizaciones registradas todavía.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

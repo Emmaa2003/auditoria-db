@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Cuestionario de auditoría')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-0" th:text="'Auditoría · ' + ${auditoria.organizacion.nombre}"></h1>
+            <p class="text-muted mb-0" th:text="'Fecha: ' + ${#temporals.format(auditoria.fechaAuditoria, 'dd/MM/yyyy')}"></p>
+        </div>
+        <div>
+            <span class="badge fs-6" th:classappend="${auditoria.estado.name() == 'FINALIZADA'} ? 'bg-success' : 'bg-warning text-dark'"
+                  th:text="${auditoria.estado.name() == 'FINALIZADA'} ? 'Finalizada' : 'En progreso'"></span>
+            <a th:if="${auditoria.estado.name() == 'FINALIZADA'}" th:href="@{/auditorias/{id}/resultados(id=${auditoria.idAuditoria})}"
+               class="btn btn-sm btn-primary ms-2">Ver resultados</a>
+        </div>
+    </div>
+
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <div class="alert alert-warning" th:if="${auditoria.estado.name() == 'FINALIZADA'}">
+        Esta auditoría ya fue finalizada. Las respuestas se muestran en modo solo lectura.
+    </div>
+
+    <form th:action="@{/auditorias/{id}/respuestas(id=${auditoria.idAuditoria})}" th:object="${cuestionarioForm}" method="post">
+        <fieldset th:disabled="${auditoria.estado.name() == 'FINALIZADA'}">
+
+        <div class="card shadow-sm mb-4" th:each="grupo : ${grupos}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-secondary me-2" th:text="${grupo.control.codigo}"></span>
+                    <strong th:text="${grupo.control.nombre}"></strong>
+                    <span class="text-muted ms-2" th:text="'(' + ${grupo.control.dominio} + ' · Peso ' + ${grupo.control.peso} + ')'"></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted" th:if="${grupo.control.objetivo}" th:text="${grupo.control.objetivo}"></p>
+
+                <div class="border-bottom py-3" th:each="pi : ${grupo.preguntas}">
+                    <p class="fw-semibold mb-2" th:text="${pi.pregunta.texto}"></p>
+
+                    <input type="hidden" th:field="*{respuestas[__${pi.indice}__].idPregunta}">
+
+                    <div class="d-flex flex-wrap gap-3 mb-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{respuestas[__${pi.indice}__].valor}"
+                                   th:id="'valor-' + ${pi.indice} + '-si'" value="SI">
+                            <label class="form-check-label" th:for="'valor-' + ${pi.indice} + '-si'">Sí</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{respuestas[__${pi.indice}__].valor}"
+                                   th:id="'valor-' + ${pi.indice} + '-no'" value="NO">
+                            <label class="form-check-label" th:for="'valor-' + ${pi.indice} + '-no'">No</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" th:field="*{respuestas[__${pi.indice}__].valor}"
+                                   th:id="'valor-' + ${pi.indice} + '-na'" value="NO_APLICA">
+                            <label class="form-check-label" th:for="'valor-' + ${pi.indice} + '-na'">No aplica</label>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-7">
+                            <label class="form-label small text-muted">Observación</label>
+                            <textarea class="form-control form-control-sm" rows="2"
+                                      th:field="*{respuestas[__${pi.indice}__].observacion}"></textarea>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small text-muted">Evidencia (texto o URL)</label>
+                            <input type="text" class="form-control form-control-sm"
+                                   th:field="*{respuestas[__${pi.indice}__].evidencia}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mb-5 no-print">
+            <button type="submit" class="btn btn-outline-primary">Guardar borrador</button>
+            <button type="submit" th:formaction="@{/auditorias/{id}/finalizar(id=${auditoria.idAuditoria})}"
+                    class="btn btn-success" onclick="return confirm('¿Finalizar la auditoría? Ya no podrá editar las respuestas.');">
+                Finalizar auditoría
+            </button>
+        </div>
+        </fieldset>
+    </form>
+</div>
+</body>
+</html>

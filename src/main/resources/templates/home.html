@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Inicio')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="p-4 p-md-5 mb-4 rounded-3 bg-white shadow-sm">
+        <h1 class="display-6">Bienvenido a Auditoría BD</h1>
+        <p class="col-md-8 fs-5 text-muted">
+            Plataforma de auditoría de seguridad de bases de datos basada en los
+            controles del dominio tecnológico, organizacional, de personas y físico
+            de ISO/IEC 27002.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Organizaciones</h5>
+                    <p class="card-text">Registra y administra las organizaciones a auditar.</p>
+                    <a th:href="@{/organizaciones}" class="btn btn-outline-primary">Ver organizaciones</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Nueva auditoría</h5>
+                    <p class="card-text">Inicia una nueva auditoría ISO/IEC 27002 sobre una organización.</p>
+                    <a th:href="@{/auditorias/nueva}" class="btn btn-outline-primary">Nueva auditoría</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" sec:authorize="hasRole('ADMINISTRADOR')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Catálogo de controles</h5>
+                    <p class="card-text">Administra los controles y preguntas ISO/IEC 27002.</p>
+                    <a th:href="@{/admin/catalogo}" class="btn btn-outline-primary">Ver catálogo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

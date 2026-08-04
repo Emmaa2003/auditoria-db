@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Error')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <h1 class="display-4" th:text="${status} ?: '—'"></h1>
+            <p class="fs-5">Ocurrió un problema al procesar su solicitud.</p>
+            <a th:href="@{/}" class="btn btn-primary">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

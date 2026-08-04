@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Nueva auditoría')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h1 class="h3 mb-3">Nueva auditoría</h1>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form th:action="@{/auditorias/nueva}" th:object="${nuevaAuditoriaForm}" method="post" novalidate>
+
+                        <div class="mb-3">
+                            <label for="idOrganizacion" class="form-label">Organización</label>
+                            <select class="form-select" id="idOrganizacion" th:field="*{idOrganizacion}"
+                                    th:classappend="${#fields.hasErrors('idOrganizacion')} ? 'is-invalid'" required>
+                                <option value="">Seleccione una organización...</option>
+                                <option th:each="org : ${organizaciones}" th:value="${org.idOrganizacion}" th:text="${org.nombre}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('idOrganizacion')}" th:errors="*{idOrganizacion}"></div>
+                            <div class="form-text" th:if="${#lists.isEmpty(organizaciones)}">
+                                No hay organizaciones registradas. <a th:href="@{/organizaciones/nueva}">Crea una primero</a>.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fechaAuditoria" class="form-label">Fecha de la auditoría</label>
+                            <input type="date" class="form-control" id="fechaAuditoria" th:field="*{fechaAuditoria}"
+                                   th:classappend="${#fields.hasErrors('fechaAuditoria')} ? 'is-invalid'" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('fechaAuditoria')}" th:errors="*{fechaAuditoria}"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary" th:disabled="${#lists.isEmpty(organizaciones)}">Comenzar cuestionario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

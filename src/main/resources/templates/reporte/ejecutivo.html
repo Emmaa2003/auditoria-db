@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Reporte ejecutivo')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <a th:href="@{/auditorias/{id}/resultados(id=${reporte.idAuditoria})}" class="btn btn-outline-secondary">Volver</a>
+        <button onclick="window.print()" class="btn btn-primary">Imprimir / Guardar PDF</button>
+    </div>
+
+    <div class="bg-white p-4 p-md-5 shadow-sm">
+        <h1 class="h3">Reporte ejecutivo de auditoría de seguridad de base de datos</h1>
+        <p class="text-muted">ISO/IEC 27002 · Generado el <span th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}"></span></p>
+        <hr>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>Organización:</strong> <span th:text="${reporte.organizacionNombre}"></span></p>
+                <p><strong>Área evaluada:</strong> <span th:text="${reporte.areaEvaluada}"></span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Fecha de auditoría:</strong> <span th:text="${#temporals.format(reporte.fechaAuditoria, 'dd/MM/yyyy')}"></span></p>
+                <p><strong>Auditor responsable:</strong> <span th:text="${reporte.auditorNombre}"></span></p>
+            </div>
+        </div>
+
+        <h2 class="h5">Resumen general</h2>
+        <table class="table table-bordered mb-4">
+            <tbody>
+            <tr><th>Madurez general</th><td th:text="${reporte.madurezGeneral} + ' / 5'"></td></tr>
+            <tr><th>Índice de riesgo general</th><td th:text="${reporte.indiceRiesgoGeneral} + '% (' + ${reporte.nivelRiesgoGeneralTexto} + ')'"></td></tr>
+            <tr><th>Riesgo de confidencialidad</th><td th:text="${reporte.riesgoConfidencialidad} + '%'"></td></tr>
+            <tr><th>Riesgo de integridad</th><td th:text="${reporte.riesgoIntegridad} + '%'"></td></tr>
+            <tr><th>Riesgo de disponibilidad</th><td th:text="${reporte.riesgoDisponibilidad} + '%'"></td></tr>
+            </tbody>
+        </table>
+
+        <h2 class="h5">Resultados por control</h2>
+        <table class="table table-bordered table-sm mb-4">
+            <thead>
+            <tr><th>Código</th><th>Control</th><th>Dominio</th><th>% Cumplimiento</th><th>Madurez</th><th>Riesgo</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${reporte.controles}">
+                <td th:text="${c.codigo}"></td>
+                <td th:text="${c.nombre}"></td>
+                <td th:text="${c.dominio}"></td>
+                <td th:text="${c.porcentajeCumplimiento} + '%'"></td>
+                <td th:text="${c.nivelMadurez} + '/5'"></td>
+                <td th:text="${c.riesgoControlPct} + '% (' + ${c.nivelRiesgoTexto} + ')'"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2 class="h5">Madurez promedio por dominio</h2>
+        <table class="table table-bordered table-sm mb-4">
+            <thead><tr><th>Dominio</th><th>Madurez</th></tr></thead>
+            <tbody>
+            <tr th:each="d : ${reporte.dominios}">
+                <td th:text="${d.dominio}"></td>
+                <td th:text="${d.madurezPromedio} + '/5'"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2 class="h5">Controles con menor madurez</h2>
+        <ol>
+            <li th:each="c : ${reporte.rankingMenorMadurez}" th:text="${c.codigo} + ' · ' + ${c.nombre} + ' — ' + ${c.nivelMadurez} + '/5'"></li>
+        </ol>
+
+        <h2 class="h5">Controles con mayor riesgo</h2>
+        <ol>
+            <li th:each="c : ${reporte.rankingMayorRiesgo}" th:text="${c.codigo} + ' · ' + ${c.nombre} + ' — ' + ${c.riesgoControlPct} + '%'"></li>
+        </ol>
+    </div>
+</div>
+</body>
+</html>

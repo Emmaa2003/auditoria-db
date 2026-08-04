@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Editar control')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0" th:text="${control.codigo} + ' · ' + ${control.nombre}"></h1>
+        <a th:href="@{/admin/catalogo}" class="btn btn-outline-secondary">Volver al catálogo</a>
+    </div>
+
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header">Datos del control</div>
+                <div class="card-body">
+                    <form th:action="@{/admin/catalogo/{id}/guardar(id=${control.idControl})}" th:object="${controlForm}" method="post" novalidate>
+                        <input type="hidden" th:field="*{idControl}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Código</label>
+                            <input type="text" class="form-control" th:value="${control.codigo}" disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Dominio</label>
+                            <input type="text" class="form-control" th:value="${control.dominio}" disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}"
+                                   th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'" required maxlength="150">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="objetivo" class="form-label">Objetivo</label>
+                            <input type="text" class="form-control" id="objetivo" th:field="*{objetivo}" maxlength="300">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="peso" class="form-label">Peso</label>
+                            <select class="form-select" id="peso" th:field="*{peso}" required>
+                                <option value="ALTO">ALTO</option>
+                                <option value="MEDIO">MEDIO</option>
+                                <option value="BAJO">BAJO</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Dimensiones CID afectadas</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="afectaC" th:field="*{afectaC}">
+                                <label class="form-check-label" for="afectaC">Confidencialidad</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="afectaI" th:field="*{afectaI}">
+                                <label class="form-check-label" for="afectaI">Integridad</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="afectaD" th:field="*{afectaD}">
+                                <label class="form-check-label" for="afectaD">Disponibilidad</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">Preguntas</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item" th:each="p : ${preguntas}">
+                        <form th:action="@{/admin/catalogo/preguntas/guardar}" th:object="${p}" method="post" class="row g-2 align-items-center" novalidate>
+                            <input type="hidden" name="idPregunta" th:value="${p.idPregunta}">
+                            <input type="hidden" name="idControl" th:value="${control.idControl}">
+                            <div class="col-2">
+                                <input type="number" class="form-control form-control-sm" name="orden" th:value="${p.orden}" min="1" required>
+                            </div>
+                            <div class="col-8">
+                                <input type="text" class="form-control form-control-sm" name="texto" th:value="${p.texto}" maxlength="300" required>
+                            </div>
+                            <div class="col-2">
+                                <button type="submit" class="btn btn-sm btn-outline-primary w-100">Guardar</button>
+                            </div>
+                        </form>
+                    </li>
+                    <li class="list-group-item text-muted" th:if="${#lists.isEmpty(preguntas)}">
+                        Este control no tiene preguntas todavía.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">Agregar nueva pregunta</div>
+                <div class="card-body">
+                    <form th:action="@{/admin/catalogo/preguntas/guardar}" th:object="${nuevaPreguntaForm}" method="post" class="row g-2" novalidate>
+                        <input type="hidden" th:field="*{idControl}">
+                        <div class="col-3">
+                            <label class="form-label">Orden</label>
+                            <input type="number" class="form-control" th:field="*{orden}" min="1" required>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">Texto</label>
+                            <input type="text" class="form-control" th:field="*{texto}" maxlength="300" required>
+                        </div>
+                        <div class="col-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Agregar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

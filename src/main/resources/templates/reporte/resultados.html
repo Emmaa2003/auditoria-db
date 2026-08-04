@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Resultados de auditoría')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-0" th:text="'Resultados · ' + ${reporte.organizacionNombre}"></h1>
+            <p class="text-muted mb-0" th:text="${reporte.areaEvaluada} + ' · ' + ${#temporals.format(reporte.fechaAuditoria, 'dd/MM/yyyy')} + ' · Auditor: ' + ${reporte.auditorNombre}"></p>
+        </div>
+        <a th:href="@{/auditorias/{id}/resultados/ejecutivo(id=${reporte.idAuditoria})}" class="btn btn-outline-dark no-print">Reporte ejecutivo imprimible</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Madurez general</div>
+                    <div class="fs-2 fw-bold" th:text="${reporte.madurezGeneral} + ' / 5'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Índice de riesgo general</div>
+                    <div class="fs-2 fw-bold" th:text="${reporte.indiceRiesgoGeneral} + '%'"></div>
+                    <span class="badge heatmap-cell d-inline-block mt-1" th:classappend="${reporte.nivelRiesgoGeneralCss}" th:text="${reporte.nivelRiesgoGeneralTexto}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Riesgo confidencialidad</div>
+                    <div class="fs-4 fw-semibold" th:text="${reporte.riesgoConfidencialidad} + '%'"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Riesgo integridad / disponibilidad</div>
+                    <div class="fw-semibold" th:text="'I: ' + ${reporte.riesgoIntegridad} + '%  ·  D: ' + ${reporte.riesgoDisponibilidad} + '%'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Madurez por control</div>
+        <div class="card-body">
+            <canvas id="chartMadurez" height="90"></canvas>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Mapa de calor de riesgo por control</div>
+        <div class="card-body">
+            <div class="row row-cols-2 row-cols-md-5 g-2">
+                <div class="col" th:each="c : ${reporte.controles}">
+                    <div class="heatmap-cell" th:classappend="${c.nivelRiesgoCss}">
+                        <div th:text="${c.codigo}"></div>
+                        <small th:text="${c.riesgoControlPct} + '%'"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Resultados por control</div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Código</th><th>Nombre</th><th>Dominio</th><th>Peso</th>
+                    <th>% Cumplimiento</th><th>Madurez</th><th>Riesgo</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${reporte.controles}">
+                    <td><span class="badge bg-secondary" th:text="${c.codigo}"></span></td>
+                    <td th:text="${c.nombre}"></td>
+                    <td th:text="${c.dominio}"></td>
+                    <td th:text="${c.peso}"></td>
+                    <td th:text="${c.porcentajeCumplimiento} + '%'"></td>
+                    <td th:text="${c.nivelMadurez} + ' / 5'"></td>
+                    <td>
+                        <span class="badge heatmap-cell" th:classappend="${c.nivelRiesgoCss}"
+                              th:text="${c.riesgoControlPct} + '% (' + ${c.nivelRiesgoTexto} + ')'"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Madurez promedio por dominio</div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Dominio</th><th>Madurez</th></tr></thead>
+                        <tbody>
+                        <tr th:each="d : ${reporte.dominios}">
+                            <td th:text="${d.dominio}"></td>
+                            <td th:text="${d.madurezPromedio} + ' / 5'"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Controles con menor madurez</div>
+                <ol class="list-group list-group-numbered list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between" th:each="c : ${reporte.rankingMenorMadurez}">
+                        <span th:text="${c.codigo} + ' · ' + ${c.nombre}"></span>
+                        <span class="badge bg-dark" th:text="${c.nivelMadurez} + '/5'"></span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header">Controles con mayor riesgo</div>
+        <ol class="list-group list-group-numbered list-group-flush">
+            <li class="list-group-item d-flex justify-content-between" th:each="c : ${reporte.rankingMayorRiesgo}">
+                <span th:text="${c.codigo} + ' · ' + ${c.nombre}"></span>
+                <span class="badge heatmap-cell" th:classappend="${c.nivelRiesgoCss}" th:text="${c.riesgoControlPct} + '%'"></span>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const labels = /*[[${reporte.controles.![codigo]}]]*/ [];
+    const madurez = /*[[${reporte.controles.![nivelMadurez]}]]*/ [];
+    /*]]>*/
+
+    new Chart(document.getElementById('chartMadurez'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Nivel de madurez (0-5)',
+                data: madurez,
+                backgroundColor: '#0d6efd'
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+</body>
+</html>

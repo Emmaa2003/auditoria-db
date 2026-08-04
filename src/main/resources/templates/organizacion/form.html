@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Organización')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <h1 class="h3 mb-3" th:text="${organizacionForm.idOrganizacion} != null ? 'Editar organización' : 'Nueva organización'"></h1>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form th:action="@{/organizaciones/guardar}" th:object="${organizacionForm}" method="post" novalidate>
+                        <input type="hidden" th:field="*{idOrganizacion}">
+
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}"
+                                   th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'" required maxlength="150">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="areaEvaluada" class="form-label">Área evaluada</label>
+                            <input type="text" class="form-control" id="areaEvaluada" th:field="*{areaEvaluada}"
+                                   th:classappend="${#fields.hasErrors('areaEvaluada')} ? 'is-invalid'" required maxlength="150">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('areaEvaluada')}" th:errors="*{areaEvaluada}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="administradorBd" class="form-label">Administrador de BD (opcional)</label>
+                            <input type="text" class="form-control" id="administradorBd" th:field="*{administradorBd}"
+                                   th:classappend="${#fields.hasErrors('administradorBd')} ? 'is-invalid'" maxlength="150">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('administradorBd')}" th:errors="*{administradorBd}"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/organizaciones}" class="btn btn-outline-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

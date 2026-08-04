@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Error interno')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <h1 class="display-4">500</h1>
+            <p class="fs-5">Ocurrió un error inesperado. Intente nuevamente más tarde.</p>
+            <a th:href="@{/}" class="btn btn-primary">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
