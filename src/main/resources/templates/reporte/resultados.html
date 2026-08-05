@@ -9,7 +9,10 @@
             <h1 class="h3 mb-0" th:text="'Resultados · ' + ${reporte.organizacionNombre}"></h1>
             <p class="text-muted mb-0" th:text="${reporte.areaEvaluada} + ' · ' + ${#temporals.format(reporte.fechaAuditoria, 'dd/MM/yyyy')} + ' · Auditor: ' + ${reporte.auditorNombre}"></p>
         </div>
-        <a th:href="@{/auditorias/{id}/resultados/ejecutivo(id=${reporte.idAuditoria})}" class="btn btn-outline-dark no-print">Reporte ejecutivo imprimible</a>
+        <div class="d-flex gap-2 no-print">
+            <a th:href="@{/auditorias/{id}/resultados/ejecutivo(id=${reporte.idAuditoria})}" class="btn btn-outline-dark">Reporte ejecutivo imprimible</a>
+            <a th:href="@{/auditorias/{id}/resultados/excel(id=${reporte.idAuditoria})}" class="btn btn-success">Descargar Excel</a>
+        </div>
     </div>
 
     <div class="row g-3 mb-4">

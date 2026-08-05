@@ -84,6 +84,11 @@ public class ReporteService {
         List<ResultadoControlView> rankingMayorRiesgo = new ArrayList<>(controlViews);
         rankingMayorRiesgo.sort(Comparator.comparing(ResultadoControlView::getRiesgoControlPct).reversed());
 
+        List<String> recomendaciones = new ArrayList<>();
+        for (ResultadoControlView view : rankingMenorMadurez.subList(0, Math.min(3, rankingMenorMadurez.size()))) {
+            recomendaciones.add(RecomendacionUtil.recomendacionPara(view.getCodigo()));
+        }
+
         ReporteAuditoriaView view = new ReporteAuditoriaView();
         view.setIdAuditoria(auditoria.getIdAuditoria());
         view.setOrganizacionNombre(auditoria.getOrganizacion().getNombre());
@@ -99,10 +104,13 @@ public class ReporteService {
         view.setNivelRiesgoGeneralTexto(RiesgoUtil.nivelRiesgoTexto(resultadoAuditoria.getIndiceRiesgoGeneral()));
         view.setNivelRiesgoGeneralCss(RiesgoUtil.nivelRiesgoCss(resultadoAuditoria.getIndiceRiesgoGeneral()));
 
+
+
         view.setControles(controlViews);
         view.setDominios(dominios);
         view.setRankingMenorMadurez(rankingMenorMadurez);
         view.setRankingMayorRiesgo(rankingMayorRiesgo);
+        view.setRecomendaciones(recomendaciones);
         return view;
     }
 }

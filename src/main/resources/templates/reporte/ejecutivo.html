@@ -6,7 +6,12 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <a th:href="@{/auditorias/{id}/resultados(id=${reporte.idAuditoria})}" class="btn btn-outline-secondary">Volver</a>
-        <button onclick="window.print()" class="btn btn-primary">Imprimir / Guardar PDF</button>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary">Imprimir / Guardar PDF</button>
+            <a th:href="@{/auditorias/{id}/resultados/ejecutivo/pdf(id=${reporte.idAuditoria})}" class="btn btn-danger">
+                Descargar PDF
+            </a>
+        </div>
     </div>
 
     <div class="bg-white p-4 p-md-5 shadow-sm">
@@ -73,6 +78,11 @@
         <ol>
             <li th:each="c : ${reporte.rankingMayorRiesgo}" th:text="${c.codigo} + ' · ' + ${c.nombre} + ' — ' + ${c.riesgoControlPct} + '%'"></li>
         </ol>
+
+        <h2 class="h5">Recomendaciones</h2>
+        <ul class="mb-4">
+            <li th:each="r : ${reporte.recomendaciones}" th:text="${r}"></li>
+        </ul>
     </div>
 </div>
 </body>

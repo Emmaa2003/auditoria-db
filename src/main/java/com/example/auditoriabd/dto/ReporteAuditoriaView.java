@@ -23,6 +23,7 @@ public class ReporteAuditoriaView {
     private List<ResultadoDominioView> dominios;
     private List<ResultadoControlView> rankingMenorMadurez;
     private List<ResultadoControlView> rankingMayorRiesgo;
+    private List<String> recomendaciones;
 
     public Integer getIdAuditoria() {
         return idAuditoria;
@@ -150,5 +151,13 @@ public class ReporteAuditoriaView {
 
     public void setRankingMayorRiesgo(List<ResultadoControlView> rankingMayorRiesgo) {
         this.rankingMayorRiesgo = rankingMayorRiesgo;
+    }
+
+    public List<String> getRecomendaciones() {
+        return recomendaciones;
+    }
+
+    public void setRecomendaciones(List<String> recomendaciones) {
+        this.recomendaciones = recomendaciones;
     }
 }
