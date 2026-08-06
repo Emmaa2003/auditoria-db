@@ -3,6 +3,7 @@
 <head th:replace="~{fragments/layout :: head(titulo='Página no encontrada')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main>
 <div class="container">
     <div class="row justify-content-center mt-5">
         <div class="col-md-6 text-center">
@@ -12,5 +13,7 @@
         </div>
     </div>
 </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>

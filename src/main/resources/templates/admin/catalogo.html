@@ -3,6 +3,7 @@
 <head th:replace="~{fragments/layout :: head(titulo='Catálogo de controles')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main>
 <div class="container">
     <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
     <h1 class="h3 mb-3">Catálogo de controles ISO/IEC 27002</h1>
@@ -40,6 +41,7 @@
         </div>
     </div>
 </div>
-<div th:replace="~{fragments/layout :: footer}"></div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
