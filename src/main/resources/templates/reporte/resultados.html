@@ -6,6 +6,7 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
         <div>
+            <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
             <h1 class="h3 mb-0" th:text="'Resultados · ' + ${reporte.organizacionNombre}"></h1>
             <p class="text-muted mb-0" th:text="${reporte.areaEvaluada} + ' · ' + ${#temporals.format(reporte.fechaAuditoria, 'dd/MM/yyyy')} + ' · Auditor: ' + ${reporte.auditorNombre}"></p>
         </div>
@@ -140,6 +141,7 @@
         </ol>
     </div>
 </div>
+<div th:replace="~{fragments/layout :: footer}"></div>
 
 <div th:replace="~{fragments/layout :: scripts}"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>

@@ -5,11 +5,11 @@
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <div class="container">
     <div class="p-4 p-md-5 mb-4 rounded-3 bg-white shadow-sm">
-        <h1 class="display-6">Bienvenido a Auditoría BD</h1>
+        <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+        <h1 class="display-6">Grupo RRRV · Panel de auditoría</h1>
         <p class="col-md-8 fs-5 text-muted">
-            Plataforma de auditoría de seguridad de bases de datos basada en los
-            controles del dominio tecnológico, organizacional, de personas y físico
-            de ISO/IEC 27002.
+            Evalúa el nivel de madurez y la exposición al riesgo de tus bases de datos,
+            basado en los controles ISO/IEC 27002.
         </p>
     </div>
 
@@ -43,5 +43,6 @@
         </div>
     </div>
 </div>
+<div th:replace="~{fragments/layout :: footer}"></div>
 </body>
 </html>

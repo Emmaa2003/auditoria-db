@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 120">
+  <rect x="0"  y="10" width="34" height="80" fill="#5B9BD5"/>
+  <rect x="40" y="10" width="34" height="80" fill="#3E7CA6"/>
+  <rect x="80" y="10" width="34" height="80" fill="#2C5F7C"/>
+  <rect x="120" y="10" width="34" height="80" fill="#1E3F52"/>
+  <text x="17"  y="72" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="42" fill="#FFFFFF" text-anchor="middle">R</text>
+  <text x="57"  y="72" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="42" fill="#FFFFFF" text-anchor="middle">R</text>
+  <text x="97"  y="72" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="42" fill="#FFFFFF" text-anchor="middle">R</text>
+  <text x="137" y="72" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="42" fill="#FFFFFF" text-anchor="middle">V</text>
+
+  <text x="175" y="52" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="34" letter-spacing="1" fill="#2C5F7C">GRUPO RRRV</text>
+  <text x="175" y="78" font-family="Inter, Arial, sans-serif" font-weight="600" font-size="15" letter-spacing="2" fill="#5B9BD5">SOLUCIONES DE DATOS</text>
+</svg>

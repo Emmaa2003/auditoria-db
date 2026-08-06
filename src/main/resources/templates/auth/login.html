@@ -1,35 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head(titulo='Iniciar sesión')}"></head>
-<body class="d-flex align-items-center" style="min-height: 100vh;">
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h3 class="card-title mb-1 text-center">Auditoría BD</h3>
-                    <p class="text-muted text-center mb-4">Auditoría de seguridad ISO/IEC 27002</p>
+<body>
+<div class="d-flex" style="min-height: 100vh;">
+    <div class="d-none d-md-flex flex-column justify-content-center align-items-center text-center p-5"
+         style="width: 40%; background-color: var(--rrrv-primary-darker); position: relative; overflow: hidden;">
+        <img th:src="@{/img/logo-horizontal.svg}" alt="Grupo RRRV" style="max-width: 320px; filter: brightness(0) invert(1);">
+        <p class="mt-4 px-4" style="color: #CBD5E1; max-width: 320px;">
+            Plataforma de auditoría de seguridad de bases de datos, basada en ISO/IEC 27002.
+        </p>
+    </div>
+    <div class="d-flex flex-column justify-content-center align-items-center p-4" style="width: 100%;">
+        <div style="max-width: 380px; width: 100%;">
+            <img th:src="@{/img/logo-icon.svg}" height="48" class="d-md-none mb-4" alt="Grupo RRRV">
+            <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+            <h2 class="mb-4">Iniciar sesión</h2>
 
-                    <div class="alert alert-danger" th:if="${param.error}">
-                        Correo o contraseña incorrectos.
-                    </div>
-                    <div class="alert alert-success" th:if="${param.logout}">
-                        Sesión cerrada correctamente.
-                    </div>
-
-                    <form th:action="@{/login}" method="post" novalidate>
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Correo</label>
-                            <input type="email" class="form-control" id="username" name="username" required autofocus>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-                    </form>
-                </div>
+            <div class="alert alert-danger" th:if="${param.error}">
+                Correo o contraseña incorrectos.
             </div>
+            <div class="alert alert-success" th:if="${param.logout}">
+                Sesión cerrada correctamente.
+            </div>
+
+            <form th:action="@{/login}" method="post" novalidate>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Correo</label>
+                    <input type="email" class="form-control" id="username" name="username" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+            </form>
         </div>
     </div>
 </div>

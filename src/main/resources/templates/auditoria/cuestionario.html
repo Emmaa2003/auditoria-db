@@ -6,6 +6,7 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
         <div>
+            <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
             <h1 class="h3 mb-0" th:text="'Auditoría · ' + ${auditoria.organizacion.nombre}"></h1>
             <p class="text-muted mb-0" th:text="'Fecha: ' + ${#temporals.format(auditoria.fechaAuditoria, 'dd/MM/yyyy')}"></p>
         </div>
@@ -85,5 +86,6 @@
         </fieldset>
     </form>
 </div>
+<div th:replace="~{fragments/layout :: footer}"></div>
 </body>
 </html>

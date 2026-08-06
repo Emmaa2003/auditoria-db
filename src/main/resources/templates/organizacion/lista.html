@@ -5,7 +5,10 @@
 <nav th:replace="~{fragments/layout :: navbar}"></nav>
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Organizaciones</h1>
+        <div>
+            <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+            <h1 class="h3 mb-0">Organizaciones</h1>
+        </div>
         <a th:href="@{/organizaciones/nueva}" class="btn btn-primary">+ Nueva organización</a>
     </div>
 
@@ -42,5 +45,6 @@
         </div>
     </div>
 </div>
+<div th:replace="~{fragments/layout :: footer}"></div>
 </body>
 </html>
