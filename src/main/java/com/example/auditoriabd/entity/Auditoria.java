@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.time.LocalDate;
@@ -39,8 +40,15 @@ public class Auditoria {
     @Column(name = "estado", nullable = false, length = 20)
     private EstadoAuditoria estado = EstadoAuditoria.EN_PROGRESO;
 
-    @Column(name = "fecha_creacion", nullable = false, updatable = false, insertable = false)
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
+
+    @PrePersist
+    protected void alCrear() {
+        if (fechaCreacion == null) {
+            fechaCreacion = LocalDateTime.now();
+        }
+    }
 
     public Integer getIdAuditoria() {
         return idAuditoria;
