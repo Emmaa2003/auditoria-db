@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
@@ -41,8 +42,15 @@ public class ResultadoAuditoria {
     @Column(name = "indice_riesgo_general", precision = 5, scale = 2)
     private BigDecimal indiceRiesgoGeneral;
 
-    @Column(name = "fecha_calculo", nullable = false, updatable = false, insertable = false)
+    @Column(name = "fecha_calculo", nullable = false, updatable = false)
     private LocalDateTime fechaCalculo;
+
+    @PrePersist
+    protected void alCrear() {
+        if (fechaCalculo == null) {
+            fechaCalculo = LocalDateTime.now();
+        }
+    }
 
     public Integer getIdResultadoAuditoria() {
         return idResultadoAuditoria;
