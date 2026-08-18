@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -36,8 +37,15 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private boolean activo = true;
 
-    @Column(name = "fecha_creacion", nullable = false, updatable = false, insertable = false)
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
+
+    @PrePersist
+    protected void alCrear() {
+        if (fechaCreacion == null) {
+            fechaCreacion = LocalDateTime.now();
+        }
+    }
 
     public Integer getIdUsuario() {
         return idUsuario;
