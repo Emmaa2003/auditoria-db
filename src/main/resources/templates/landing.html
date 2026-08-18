@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Auditoría de bases de datos ISO/IEC 27002')}"></head>
+<body>
+<style>
+    /* Estilos propios de la landing pública. No afectan al resto de la app. */
+    .lp-header {
+        border-bottom: 1px solid rgba(30, 63, 82, .08);
+        background: #fff;
+    }
+
+    /* Hero: panel oscuro asimétrico + columna de barras (motivo del logo, a gran escala) */
+    .lp-hero {
+        background: var(--rrrv-primary-darker);
+        color: #E8EEF3;
+    }
+    .lp-hero h1 {
+        color: #fff;
+        font-size: clamp(2.1rem, 4vw, 3.1rem);
+        line-height: 1.1;
+    }
+    .lp-hero .lp-kicker {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: .8rem;
+        letter-spacing: .12em;
+        color: var(--rrrv-primary);
+        text-transform: uppercase;
+    }
+    .lp-hero-bars {
+        display: flex;
+        gap: 10px;
+        height: 100%;
+        min-height: 280px;
+    }
+    .lp-hero-bars > div {
+        flex: 1;
+        border-radius: 6px;
+        display: flex;
+        align-items: flex-end;
+        padding: 1rem .75rem;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: .78rem;
+        color: rgba(255,255,255,.92);
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+    }
+    .lp-hero-bars .b1 { background: var(--rrrv-primary); }
+    .lp-hero-bars .b2 { background: var(--rrrv-primary-mid); }
+    .lp-hero-bars .b3 { background: var(--rrrv-primary-dark); }
+    .lp-hero-bars .b4 { background: #16303F; }
+
+    /* Sección de problemas: lista editorial, no tarjetas */
+    .lp-problema {
+        border-left: 6px solid var(--rrrv-primary);
+        padding: .25rem 0 .25rem 1.5rem;
+    }
+    .lp-problema:nth-child(2) { border-color: var(--rrrv-primary-mid); margin-left: 0; }
+    .lp-problema:nth-child(3) { border-color: var(--rrrv-primary-dark); margin-left: 2.5rem; }
+    .lp-problema:nth-child(4) { border-color: var(--rrrv-primary-darker); margin-left: 0; }
+    .lp-problema .num {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 800;
+        font-size: .95rem;
+        color: var(--rrrv-primary-mid);
+        letter-spacing: .05em;
+    }
+
+    /* Cómo funciona: timeline horizontal con números grandes */
+    .lp-paso {
+        position: relative;
+        padding-top: .5rem;
+    }
+    .lp-paso .n {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 800;
+        font-size: 2.75rem;
+        line-height: 1;
+        color: var(--rrrv-primary);
+        opacity: .35;
+    }
+    .lp-paso h4 { margin-top: -.6rem; }
+    .lp-dominios span {
+        display: inline-block;
+        font-size: .78rem;
+        font-weight: 600;
+        padding: .2rem .6rem;
+        border-radius: 3px;
+        margin: 0 .35rem .35rem 0;
+        color: #fff;
+    }
+
+    /* Métricas: banda con dato grande + grilla secundaria */
+    .lp-metricas { background: var(--rrrv-bg); }
+    .lp-stat-grande .valor {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 800;
+        font-size: clamp(3rem, 7vw, 5rem);
+        line-height: 1;
+        color: var(--rrrv-primary-darker);
+    }
+    .lp-stat-mini .valor {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 800;
+        font-size: 1.9rem;
+        color: var(--rrrv-primary-dark);
+    }
+    .lp-barra-riesgo {
+        display: flex;
+        height: 14px;
+        border-radius: 7px;
+        overflow: hidden;
+        background: #E2E8F0;
+    }
+
+    /* CTA final */
+    .lp-cta {
+        background: var(--rrrv-primary-darker);
+        color: #fff;
+    }
+
+    @media (max-width: 767px) {
+        .lp-hero-bars { display: none; }
+        .lp-problema { margin-left: 0 !important; }
+    }
+</style>
+
+<header class="lp-header py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <img th:src="@{/img/logo-horizontal.svg}" alt="Grupo RRRV" height="34">
+        <a th:href="@{/login}" class="btn btn-primary">Ingresar</a>
+    </div>
+</header>
+
+<main>
+
+    <!-- HERO -->
+    <section class="lp-hero">
+        <div class="container py-5">
+            <div class="row align-items-center g-5 py-4">
+                <div class="col-lg-7">
+                    <p class="lp-kicker mb-2">Grupo RRRV · Auditoría de bases de datos</p>
+                    <h1 class="mb-4">La seguridad de sus bases de datos, medida con evidencia, no con impresiones.</h1>
+                    <p class="fs-5" style="max-width: 560px; color: #C7D3DD;">
+                        ISO/IEC 27002 es la norma internacional que define buenas prácticas de seguridad de la
+                        información: qué controlar, revisar y documentar para proteger un activo. Este sistema
+                        toma un conjunto de esos controles aplicado específicamente a bases de datos y lo convierte
+                        en un cuestionario estructurado que un auditor responde por cada control, control que
+                        el sistema traduce automáticamente en un índice de madurez y de riesgo, respaldado por
+                        evidencia y con recomendaciones concretas por cada hallazgo.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 mt-4">
+                        <a th:href="@{/login}" class="btn btn-primary btn-lg px-4">Ingresar</a>
+                        <span class="small" style="color: #93A5B4;">Acceso reservado a auditores autorizados de Grupo RRRV.</span>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-md-block">
+                    <div class="lp-hero-bars">
+                        <div class="b1">Tecnológico</div>
+                        <div class="b2">Organizacional</div>
+                        <div class="b3">De personas</div>
+                        <div class="b4">Físico</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROBLEMAS -->
+    <section class="py-5">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+                    <p class="lp-kicker mb-2" style="color: var(--rrrv-primary-mid);">El problema</p>
+                    <h2 class="mb-3" style="font-size: 2rem;">La mayoría de las bases de datos se auditan por
+                        impresión, no por evidencia.</h2>
+                    <p class="text-muted fs-5">
+                        Son preguntas que casi siempre se responden "sí, creemos que sí" sin nada que lo respalde.
+                        Estas son las cuatro que más se repiten.
+                    </p>
+                </div>
+                <div class="col-lg-7">
+                    <div class="lp-problema mb-4">
+                        <div class="num">01 · ACCESO</div>
+                        <h5>Nadie tiene una lista actualizada de quién administra la base de datos.</h5>
+                        <p class="text-muted mb-0">Los permisos de administrador se acumulan con el tiempo:
+                            personas que cambiaron de puesto o dejaron la organización, pero conservan el acceso
+                            porque nadie lo revisó ni lo revocó.</p>
+                    </div>
+                    <div class="lp-problema mb-4">
+                        <div class="num">02 · CONTINUIDAD</div>
+                        <h5>Los respaldos existen, pero nunca se ha probado restaurarlos.</h5>
+                        <p class="text-muted mb-0">Un calendario de backups no garantiza nada si, al momento de
+                            necesitarlo, la copia no se puede restaurar. Es uno de los hallazgos más comunes y
+                            de los más caros de descubrir tarde.</p>
+                    </div>
+                    <div class="lp-problema mb-4">
+                        <div class="num">03 · EVIDENCIA</div>
+                        <h5>El riesgo se declara de palabra, no se calcula.</h5>
+                        <p class="text-muted mb-0">"El riesgo es medio" sin una metodología detrás no resiste una
+                            auditoría externa. Se necesita un cálculo repetible, basado en cuánto cumple cada
+                            control y qué tan crítico es ese control.</p>
+                    </div>
+                    <div class="lp-problema">
+                        <div class="num">04 · TRAZABILIDAD</div>
+                        <h5>Cada auditoría vive en un documento distinto, sin comparación posible.</h5>
+                        <p class="text-muted mb-0">Sin un histórico estructurado por organización, es imposible
+                            saber si el nivel de madurez mejoró, empeoró o simplemente se repitió de un año a otro.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CÓMO FUNCIONA -->
+    <section class="py-5" style="background: #EEF2F6;">
+        <div class="container py-4">
+            <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+            <p class="lp-kicker mb-2" style="color: var(--rrrv-primary-mid);">Cómo funciona</p>
+            <h2 class="mb-5" style="font-size: 2rem; max-width: 680px;">Cuatro pasos, del registro de la
+                organización al reporte ejecutivo.</h2>
+
+            <div class="row g-4">
+                <div class="col-md-3 lp-paso">
+                    <div class="n">01</div>
+                    <h4 class="h5">Registrar la organización</h4>
+                    <p class="text-muted">Se documenta la organización, el área evaluada y el administrador de
+                        base de datos responsable, como punto de partida de la auditoría.</p>
+                </div>
+                <div class="col-md-3 lp-paso">
+                    <div class="n">02</div>
+                    <h4 class="h5">Responder el cuestionario por control</h4>
+                    <p class="text-muted">Cada control ISO se evalúa con preguntas Sí / No / No aplica, agrupadas
+                        en cuatro dominios:</p>
+                    <div class="lp-dominios">
+                        <span style="background: var(--rrrv-primary-darker);">Organizacional</span>
+                        <span style="background: var(--rrrv-primary-dark);">De personas</span>
+                        <span style="background: var(--rrrv-primary-mid);">Físico</span>
+                        <span style="background: var(--rrrv-primary);">Tecnológico</span>
+                    </div>
+                </div>
+                <div class="col-md-3 lp-paso">
+                    <div class="n">03</div>
+                    <h4 class="h5">Cálculo automático de madurez y riesgo</h4>
+                    <p class="text-muted">El sistema convierte el % de cumplimiento de cada control en un nivel
+                        de madurez (0 a 5) y, según el peso del control, en riesgo de confidencialidad, integridad
+                        y disponibilidad.</p>
+                </div>
+                <div class="col-md-3 lp-paso">
+                    <div class="n">04</div>
+                    <h4 class="h5">Reporte ejecutivo</h4>
+                    <p class="text-muted">Ranking de controles con menor madurez y mayor riesgo, y una
+                        recomendación puntual por cada uno, listo para exportar y compartir.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTADOS / MÉTRICAS REALES -->
+    <section class="lp-metricas py-5">
+        <div class="container py-4">
+            <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+            <p class="lp-kicker mb-2" style="color: var(--rrrv-primary-mid);">En números</p>
+            <h2 class="mb-5" style="font-size: 2rem; max-width: 680px;">Lo que hay registrado hoy en el sistema,
+                actualizado en tiempo real.</h2>
+
+            <div class="row g-5 align-items-start">
+                <div class="col-lg-4 lp-stat-grande">
+                    <div class="valor" th:text="${metricas.organizacionesRegistradas}">0</div>
+                    <p class="text-muted mb-0">Organizaciones registradas en el sistema, cada una con su propio
+                        historial de auditorías.</p>
+                </div>
+                <div class="col-lg-8">
+                    <div class="row g-4">
+                        <div class="col-sm-6 lp-stat-mini">
+                            <div class="valor" th:text="${metricas.auditoriasFinalizadas}">0</div>
+                            <p class="text-muted mb-0 small">Auditorías finalizadas, con resultado de madurez y
+                                riesgo calculado.</p>
+                        </div>
+                        <div class="col-sm-6 lp-stat-mini">
+                            <div class="valor" th:text="${metricas.auditoriasEnProgreso}">0</div>
+                            <p class="text-muted mb-0 small">Auditorías en curso, con el cuestionario todavía
+                                abierto.</p>
+                        </div>
+                        <div class="col-sm-6 lp-stat-mini">
+                            <div class="valor" th:text="${metricas.totalControlesEvaluados}">0</div>
+                            <p class="text-muted mb-0 small">Controles ISO/IEC 27002 del catálogo, repartidos en
+                                <span th:text="${metricas.totalDominios}">4</span> dominios de seguridad.</p>
+                        </div>
+                        <div class="col-sm-6 lp-stat-mini" th:if="${metricas.hayResultados}">
+                            <div class="valor" th:text="${metricas.madurezPromedio} + ' / 5'">0 / 5</div>
+                            <p class="text-muted mb-0 small">Madurez promedio: qué tan completos están, en
+                                promedio, los controles ya evaluados.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5" th:if="${metricas.hayResultados}">
+                <h3 class="h5 mb-1">Distribución del riesgo en las auditorías finalizadas</h3>
+                <p class="text-muted small mb-3">
+                    El riesgo de cada auditoría se calcula sobre la exposición en confidencialidad, integridad y
+                    disponibilidad; entre <strong>0%</strong> (bajo) y <strong>100%</strong> (crítico).
+                </p>
+                <div class="lp-barra-riesgo mb-2">
+                    <div class="riesgo-bajo"
+                         th:style="'width: ' + (${metricas.distribucionRiesgo['Bajo'] * 100.0 / metricas.auditoriasFinalizadas}) + '%'"></div>
+                    <div class="riesgo-medio"
+                         th:style="'width: ' + (${metricas.distribucionRiesgo['Medio'] * 100.0 / metricas.auditoriasFinalizadas}) + '%'"></div>
+                    <div class="riesgo-alto"
+                         th:style="'width: ' + (${metricas.distribucionRiesgo['Alto'] * 100.0 / metricas.auditoriasFinalizadas}) + '%'"></div>
+                    <div class="riesgo-critico"
+                         th:style="'width: ' + (${metricas.distribucionRiesgo['Crítico'] * 100.0 / metricas.auditoriasFinalizadas}) + '%'"></div>
+                </div>
+                <div class="d-flex flex-wrap gap-3 small text-muted">
+                    <span><span class="riesgo-bajo" style="display:inline-block;width:.7rem;height:.7rem;border-radius:2px;"></span>
+                        Bajo · <span th:text="${metricas.distribucionRiesgo['Bajo']}">0</span></span>
+                    <span><span class="riesgo-medio" style="display:inline-block;width:.7rem;height:.7rem;border-radius:2px;"></span>
+                        Medio · <span th:text="${metricas.distribucionRiesgo['Medio']}">0</span></span>
+                    <span><span class="riesgo-alto" style="display:inline-block;width:.7rem;height:.7rem;border-radius:2px;"></span>
+                        Alto · <span th:text="${metricas.distribucionRiesgo['Alto']}">0</span></span>
+                    <span><span class="riesgo-critico" style="display:inline-block;width:.7rem;height:.7rem;border-radius:2px;"></span>
+                        Crítico · <span th:text="${metricas.distribucionRiesgo['Crítico']}">0</span></span>
+                </div>
+            </div>
+
+            <p class="text-muted mt-4 mb-0" th:unless="${metricas.hayResultados}">
+                Todavía no hay auditorías finalizadas en el sistema, así que aún no hay un índice de riesgo que
+                mostrar. En cuanto se cierre la primera, este bloque se completa solo.
+            </p>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="lp-cta py-5">
+        <div class="container py-3 text-center">
+            <div class="rrrv-divider mx-auto"><span></span><span></span><span></span><span></span></div>
+            <h2 class="mb-3">¿Es usted auditor de Grupo RRRV?</h2>
+            <p class="mb-4" style="color: #C7D3DD; max-width: 520px; margin-left: auto; margin-right: auto;">
+                Ingrese con su cuenta para registrar organizaciones, abrir una auditoría nueva o retomar una que
+                ya tenga en curso.
+            </p>
+            <a th:href="@{/login}" class="btn btn-light btn-lg px-4">Ingresar al sistema</a>
+        </div>
+    </section>
+
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
