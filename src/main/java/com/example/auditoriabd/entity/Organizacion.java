@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -27,8 +28,15 @@ public class Organizacion {
     @Column(name = "administrador_bd", length = 150)
     private String administradorBd;
 
-    @Column(name = "fecha_registro", nullable = false, updatable = false, insertable = false)
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;
+
+    @PrePersist
+    protected void alCrear() {
+        if (fechaRegistro == null) {
+            fechaRegistro = LocalDateTime.now();
+        }
+    }
 
     public Integer getIdOrganizacion() {
         return idOrganizacion;
