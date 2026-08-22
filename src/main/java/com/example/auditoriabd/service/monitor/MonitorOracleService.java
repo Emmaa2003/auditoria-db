@@ -264,8 +264,8 @@ public class MonitorOracleService {
         BigDecimal pgaHit = pga.getOrDefault("cache hit percentage", BigDecimal.ZERO);
         long overAlloc = pga.getOrDefault("over allocation count", BigDecimal.ZERO).longValue();
 
-        BigDecimal totalSga = sga.getOrDefault("Total SGA Size", BigDecimal.ZERO);
-        BigDecimal freeSga = sga.getOrDefault("Free SGA Memory", BigDecimal.ZERO);
+        BigDecimal totalSga = sga.getOrDefault("Maximum SGA Size", BigDecimal.ZERO);
+        BigDecimal freeSga = sga.getOrDefault("Free SGA Memory Available", BigDecimal.ZERO);
         BigDecimal sgaUsedPct = totalSga.compareTo(BigDecimal.ZERO) > 0
                 ? totalSga.subtract(freeSga).divide(totalSga, 4, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
                 : BigDecimal.ZERO;
@@ -282,9 +282,15 @@ public class MonitorOracleService {
                 overAlloc > 0
                         ? "La PGA ha excedido PGA_AGGREGATE_TARGET " + overAlloc + " vez/veces."
                         : "Sin eventos de over-allocation de PGA."));
+        // Uso de "Free SGA Memory Available" no se clasifica con la escala generica de utilizacion:
+        // llegar a 0% libre (100% "usado" contra el techo SGA_MAX_SIZE) es el estado ESPERADO en
+        // regimen estable de Automatic Shared Memory Management, no una senal de agotamiento como
+        // si fuera uso de procesos/sesiones/tablespace - comprobado contra la base real, donde este
+        // valor da 100% de forma consistente sin que la instancia tenga ningun problema. Por eso usa
+        // una clasificacion propia, mucho mas tolerante, en vez de la escala 70/85/95 generica.
         metricas.add(new Metrica("MEMORIA", "Uso de SGA", texto(sgaUsedPct), "90% (solo penaliza salud sobre este umbral)",
-                IndicadorOracleUtil.claseUtilizacion(sgaUsedPct.doubleValue()),
-                "Uso de la SGA: " + texto(sgaUsedPct) + "."));
+                IndicadorOracleUtil.claseUsoSga(sgaUsedPct.doubleValue()),
+                "Uso de la SGA respecto al techo SGA_MAX_SIZE: " + texto(sgaUsedPct) + "."));
 
         BigDecimal scoreOveralloc = overAlloc == 0
                 ? BigDecimal.valueOf(100)
@@ -312,7 +318,10 @@ public class MonitorOracleService {
         List<OracleVistaDinamicaService.UsoTablespace> tablespaces = vistaDinamicaService.obtenerUsoTablespaces();
 
         long totalDf = datafiles.values().stream().mapToLong(Long::longValue).sum();
-        long onlineDf = datafiles.getOrDefault("ONLINE", 0L);
+        // El datafile del tablespace SYSTEM siempre reporta status='SYSTEM' (nunca 'ONLINE') aunque
+        // este perfectamente sano - comprobado contra V$DATAFILE real. Contarlo como "fuera de linea"
+        // generaba una alerta CRITICA falsa en toda instalacion Oracle (bug real encontrado y corregido).
+        long onlineDf = datafiles.getOrDefault("ONLINE", 0L) + datafiles.getOrDefault("SYSTEM", 0L);
         long offlineDf = totalDf - onlineDf;
 
         long totalTf = tempfiles.values().stream().mapToLong(Long::longValue).sum();

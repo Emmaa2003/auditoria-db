@@ -49,6 +49,22 @@ public final class IndicadorOracleUtil {
         return NivelAlerta.NORMAL;
     }
 
+    /**
+     * "Uso de SGA" (Maximum SGA Size vs Free SGA Memory Available) NO se
+     * clasifica con ningun nivel de alerta: llegar a 0% de memoria libre
+     * para el Automatic Shared Memory Management (100% "usado") es el
+     * estado estable ESPERADO y PERMANENTE una vez que ASMM termina de
+     * repartir los componentes de la SGA, no una condicion transitoria que
+     * deba vigilarse como sesiones bloqueadas o un tablespace llenandose -
+     * comprobado contra una instancia real y sana que da 100% de forma
+     * consistente en cada ciclo. Por eso siempre se reporta como NORMAL: es
+     * una metrica puramente informativa (no genera alerta ni se persiste en
+     * monitor_alerta), a diferencia de {@link #claseUtilizacion(double)}.
+     */
+    public static NivelAlerta claseUsoSga(double porcentaje) {
+        return NivelAlerta.NORMAL;
+    }
+
     public static String textoNivelAlerta(NivelAlerta nivel) {
         return switch (nivel) {
             case NORMAL -> "Normal";

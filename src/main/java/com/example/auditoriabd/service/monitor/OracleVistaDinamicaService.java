@@ -57,16 +57,14 @@ public class OracleVistaDinamicaService {
         }
     }
 
-    /** Uso de un tablespace: bytes totales y bytes libres. */
+    /** Uso de un tablespace: porcentaje usado, ya calculado por Oracle. */
     public static class UsoTablespace {
         private final String nombre;
-        private final long bytesTotal;
-        private final long bytesLibres;
+        private final BigDecimal porcentajeUsado;
 
-        public UsoTablespace(String nombre, long bytesTotal, long bytesLibres) {
+        public UsoTablespace(String nombre, BigDecimal porcentajeUsado) {
             this.nombre = nombre;
-            this.bytesTotal = bytesTotal;
-            this.bytesLibres = bytesLibres;
+            this.porcentajeUsado = porcentajeUsado;
         }
 
         public String getNombre() {
@@ -74,28 +72,39 @@ public class OracleVistaDinamicaService {
         }
 
         public BigDecimal getPorcentajeUsado() {
-            if (bytesTotal <= 0) {
-                return BigDecimal.ZERO;
-            }
-            return BigDecimal.valueOf(bytesTotal - bytesLibres)
-                    .divide(BigDecimal.valueOf(bytesTotal), 4, java.math.RoundingMode.HALF_UP)
-                    .multiply(BigDecimal.valueOf(100));
+            return porcentajeUsado;
         }
     }
 
-    /** Limites de procesos y sesiones (V$RESOURCE_LIMIT), claves 'processes' y 'sessions'. */
+    /**
+     * Limites de procesos y sesiones, claves 'processes' y 'sessions'.
+     *
+     * <p>NO se usa V$RESOURCE_LIMIT: esa vista es un concepto de instancia/CDB
+     * y, comprobado contra la base real, devuelve 0 filas para una sesion
+     * conectada directamente a una PDB (incluso con SELECT_CATALOG_ROLE y
+     * usando CONTAINERS()) - no es un problema de permisos, simplemente esta
+     * vacia en ese contexto. En su lugar se cuenta el uso real desde
+     * V$PROCESS/V$SESSION (ambas si son visibles desde la PDB) y el limite
+     * configurado desde V$PARAMETER, que tambien es visible por PDB.
+     */
     public Map<String, LimiteRecurso> obtenerLimitesRecursos() {
         Map<String, LimiteRecurso> resultado = new HashMap<>();
+
+        Long procesosActuales = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM v$process", Long.class);
+        Long sesionesActuales = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM v$session", Long.class);
+
+        Map<String, Long> limites = new HashMap<>();
         List<Map<String, Object>> filas = jdbcTemplate.queryForList(
-                "SELECT resource_name, current_utilization, limit_value " +
-                        "FROM v$resource_limit WHERE resource_name IN ('processes','sessions')");
+                "SELECT name, value FROM v$parameter WHERE name IN ('processes','sessions')");
         for (Map<String, Object> fila : filas) {
-            String nombre = String.valueOf(fila.get("RESOURCE_NAME"));
-            long actual = ((Number) fila.get("CURRENT_UTILIZATION")).longValue();
-            String limiteStr = String.valueOf(fila.get("LIMIT_VALUE"));
-            Long limite = "UNLIMITED".equalsIgnoreCase(limiteStr) ? null : Long.valueOf(limiteStr.trim());
-            resultado.put(nombre, new LimiteRecurso(actual, limite));
+            String nombre = String.valueOf(fila.get("NAME"));
+            limites.put(nombre, Long.valueOf(String.valueOf(fila.get("VALUE")).trim()));
         }
+
+        resultado.put("processes", new LimiteRecurso(
+                procesosActuales == null ? 0 : procesosActuales, limites.get("processes")));
+        resultado.put("sessions", new LimiteRecurso(
+                sesionesActuales == null ? 0 : sesionesActuales, limites.get("sessions")));
         return resultado;
     }
 
@@ -122,10 +131,18 @@ public class OracleVistaDinamicaService {
                 });
     }
 
-    /** Tamanos de SGA en bytes (V$SGAINFO), claves "Total SGA Size" y "Free SGA Memory". */
+    /**
+     * Tamanos de SGA en bytes (V$SGAINFO), claves "Maximum SGA Size" y
+     * "Free SGA Memory Available". Comprobado contra V$SGAINFO real: NO
+     * existe una fila llamada "Total SGA Size" ni "Free SGA Memory" (esos
+     * nombres no aparecen en la vista) - los nombres correctos son
+     * "Maximum SGA Size" (techo de SGA_MAX_SIZE) y "Free SGA Memory
+     * Available" (memoria aun no asignada a ningun componente, disponible
+     * para el Automatic Shared Memory Management).
+     */
     public Map<String, BigDecimal> obtenerInfoSga() {
         return jdbcTemplate.query("SELECT name, bytes FROM v$sgainfo WHERE name IN " +
-                        "('Total SGA Size','Free SGA Memory')",
+                        "('Maximum SGA Size','Free SGA Memory Available')",
                 rs -> {
                     Map<String, BigDecimal> mapa = new LinkedHashMap<>();
                     while (rs.next()) {
@@ -135,7 +152,13 @@ public class OracleVistaDinamicaService {
                 });
     }
 
-    /** Conteo de datafiles por estado (V$DATAFILE.status), ej. {"ONLINE": 5, "OFFLINE": 0}. */
+    /**
+     * Conteo de datafiles por estado (V$DATAFILE.status), ej. {"ONLINE": 3,
+     * "SYSTEM": 1}. Nota: el datafile del tablespace SYSTEM siempre reporta
+     * status='SYSTEM', nunca 'ONLINE' - es un estado sano, no un problema
+     * (comprobado contra V$DATAFILE real). El llamador debe tratar
+     * 'SYSTEM' igual que 'ONLINE'.
+     */
     public Map<String, Long> obtenerEstadoDatafiles() {
         return contarPorEstado("SELECT status, COUNT(*) cnt FROM v$datafile GROUP BY status");
     }
@@ -164,15 +187,27 @@ public class OracleVistaDinamicaService {
         return mapa;
     }
 
-    /** Uso de espacio por tablespace (DBA_DATA_FILES + DBA_FREE_SPACE). */
+    /**
+     * Uso de espacio por tablespace, en porcentaje.
+     *
+     * <p>NO se calcula a mano desde DBA_DATA_FILES/DBA_FREE_SPACE: esa cuenta
+     * usa el tamano ACTUAL de los datafiles como denominador, pero en esta
+     * base (y en general con AUTOEXTEND ON) el tamano actual es mucho menor
+     * que MAXBYTES - comprobado contra la base real, esto sobreestimaba
+     * brutalmente el uso (ej. SYSTEM salia en 99% cuando el uso real,
+     * contando el techo de autoextension, es 0.82%). DBA_TABLESPACE_USAGE_METRICS
+     * es la vista que Oracle mantiene para esto exactamente y ya usa el
+     * tamano efectivo (con autoextension) como denominador, asi que se
+     * consulta directo - es la misma vista/columna recomendada por Oracle
+     * para monitoreo de espacio de tablespaces. Se excluyen los tablespaces
+     * temporales (ya se miden aparte via V$TEMPFILE).
+     */
     public List<UsoTablespace> obtenerUsoTablespaces() {
         return jdbcTemplate.query(
-                "SELECT df.tablespace_name AS nombre, df.total_bytes AS total_bytes, " +
-                        "NVL(fs.free_bytes,0) AS free_bytes " +
-                        "FROM (SELECT tablespace_name, SUM(bytes) total_bytes FROM dba_data_files GROUP BY tablespace_name) df " +
-                        "LEFT JOIN (SELECT tablespace_name, SUM(bytes) free_bytes FROM dba_free_space GROUP BY tablespace_name) fs " +
-                        "ON df.tablespace_name = fs.tablespace_name",
-                (rs, rowNum) -> new UsoTablespace(
-                        rs.getString("nombre"), rs.getLong("total_bytes"), rs.getLong("free_bytes")));
+                "SELECT m.tablespace_name AS nombre, m.used_percent AS used_percent " +
+                        "FROM dba_tablespace_usage_metrics m " +
+                        "JOIN dba_tablespaces t ON t.tablespace_name = m.tablespace_name " +
+                        "WHERE t.contents != 'TEMPORARY'",
+                (rs, rowNum) -> new UsoTablespace(rs.getString("nombre"), rs.getBigDecimal("used_percent")));
     }
 }
