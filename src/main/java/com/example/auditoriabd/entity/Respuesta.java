@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -36,7 +37,8 @@ public class Respuesta {
     @Column(name = "valor", nullable = false, length = 10)
     private ValorRespuesta valor;
 
-    @Column(name = "observacion", columnDefinition = "text")
+    @Lob
+    @Column(name = "observacion")
     private String observacion;
 
     @Column(name = "evidencia", length = 300)

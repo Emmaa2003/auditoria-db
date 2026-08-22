@@ -8,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -35,7 +36,8 @@ public class Control {
     @Column(name = "objetivo", length = 300)
     private String objetivo;
 
-    @Column(name = "descripcion", columnDefinition = "text")
+    @Lob
+    @Column(name = "descripcion")
     private String descripcion;
 
     @Enumerated(EnumType.STRING)

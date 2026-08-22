@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(titulo='Monitor Oracle')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main>
+<div class="container">
+    <div class="mb-4">
+        <div class="rrrv-divider"><span></span><span></span><span></span><span></span></div>
+        <h1 class="h3 mb-0">Monitor de Salud de Oracle</h1>
+        <p class="text-muted mb-0">Procesos, memoria y archivos de la instancia Oracle que aloja esta aplicación, medidos en vivo en cada visita a esta página.</p>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body text-center py-4">
+            <div class="text-muted small text-uppercase">Índice de Salud de la Base de Datos (ISBD)</div>
+            <div class="fs-1 fw-bold" th:text="${monitor.isbd}"></div>
+            <div class="d-flex justify-content-center gap-2 flex-wrap mt-1">
+                <span class="badge heatmap-cell" th:classappend="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).cssEstadoSalud(monitor.estadoIsbd)}"
+                      th:text="'Índice: ' + ${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).textoEstadoSalud(monitor.estadoIsbd)}"></span>
+                <span class="badge heatmap-cell" th:classappend="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).cssEstadoSalud(monitor.estadoReal)}"
+                      th:text="'Estado real: ' + ${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).textoEstadoSalud(monitor.estadoReal)}"></span>
+            </div>
+            <div class="alert alert-danger mt-3 mb-0 text-start" th:if="${monitor.estadoReal.name() == 'CRITICO' and !monitor.causasEstadoReal.isEmpty()}">
+                <strong>El índice global no refleja un problema crítico detectado. Causas:</strong>
+                <ul class="mb-0">
+                    <li th:each="causa : ${monitor.causasEstadoReal}" th:text="${causa}"></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4" th:with="componente = ${monitor.ip}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header" th:text="${componente.nombre}"></div>
+                <div class="card-body">
+                    <div class="text-center mb-2">
+                        <div class="fs-2 fw-bold" th:text="${componente.valorSalud}"></div>
+                        <span class="badge heatmap-cell" th:classappend="${componente.nivelCssSalud}" th:text="${componente.nivelTextoSalud}"></span>
+                    </div>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center" th:each="m : ${componente.detalle}">
+                            <span>
+                                <span th:text="${m.nombre}"></span><br>
+                                <span class="text-muted" th:text="${m.valorTexto}"></span>
+                            </span>
+                            <span class="badge heatmap-cell" th:classappend="${m.nivelCss}" th:text="${m.nivelTexto}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" th:with="componente = ${monitor.im}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header" th:text="${componente.nombre}"></div>
+                <div class="card-body">
+                    <div class="text-center mb-2">
+                        <div class="fs-2 fw-bold" th:text="${componente.valorSalud}"></div>
+                        <span class="badge heatmap-cell" th:classappend="${componente.nivelCssSalud}" th:text="${componente.nivelTextoSalud}"></span>
+                    </div>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center" th:each="m : ${componente.detalle}">
+                            <span>
+                                <span th:text="${m.nombre}"></span><br>
+                                <span class="text-muted" th:text="${m.valorTexto}"></span>
+                            </span>
+                            <span class="badge heatmap-cell" th:classappend="${m.nivelCss}" th:text="${m.nivelTexto}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" th:with="componente = ${monitor.ia}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header" th:text="${componente.nombre}"></div>
+                <div class="card-body">
+                    <div class="text-center mb-2">
+                        <div class="fs-2 fw-bold" th:text="${componente.valorSalud}"></div>
+                        <span class="badge heatmap-cell" th:classappend="${componente.nivelCssSalud}" th:text="${componente.nivelTextoSalud}"></span>
+                    </div>
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between align-items-center" th:each="m : ${componente.detalle}">
+                            <span>
+                                <span th:text="${m.nombre}"></span><br>
+                                <span class="text-muted" th:text="${m.valorTexto}"></span>
+                            </span>
+                            <span class="badge heatmap-cell" th:classappend="${m.nivelCss}" th:text="${m.nivelTexto}"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Alertas de esta medición</div>
+        <ul class="list-group list-group-flush" th:if="${!monitor.alertasActuales.isEmpty()}">
+            <li class="list-group-item d-flex justify-content-between align-items-start gap-2" th:each="a : ${monitor.alertasActuales}">
+                <div>
+                    <span class="badge heatmap-cell me-2" th:classappend="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).cssNivelAlerta(a.nivel)}"
+                          th:text="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).textoNivelAlerta(a.nivel)}"></span>
+                    <strong th:text="${a.variable}"></strong>
+                    <span th:text="' · ' + ${a.descripcion}"></span>
+                </div>
+                <small class="text-muted text-nowrap" th:text="${#temporals.format(a.fechaHora, 'HH:mm:ss')}"></small>
+            </li>
+        </ul>
+        <div class="card-body text-muted" th:if="${monitor.alertasActuales.isEmpty()}">
+            Sin alertas: todos los componentes están dentro de rangos normales.
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header">Evolución del ISBD</div>
+        <div class="card-body">
+            <canvas id="chartHistorico" height="90"></canvas>
+        </div>
+    </div>
+</div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const historico = [
+        /*[# th:each="h : ${monitor.historico}"]*/
+        { fecha: /*[[${#temporals.format(h.fechaHora, 'dd/MM HH:mm')}]]*/ '', valor: /*[[${h.indiceSalud}]]*/ 0 },
+        /*[/]*/
+    ];
+    /*]]>*/
+
+    new Chart(document.getElementById('chartHistorico'), {
+        type: 'line',
+        data: {
+            labels: historico.map(h => h.fecha),
+            datasets: [{
+                label: 'ISBD',
+                data: historico.map(h => h.valor),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13,110,253,.15)',
+                fill: true,
+                tension: .25
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true, max: 100 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+</body>
+</html>

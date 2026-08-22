@@ -42,6 +42,15 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4" sec:authorize="hasRole('ADMINISTRADOR')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Monitor Oracle</h5>
+                    <p class="card-text">Salud de procesos, memoria y archivos de la instancia Oracle.</p>
+                    <a th:href="@{/monitor}" class="btn btn-outline-primary">Ver monitor</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </main>
