@@ -16,6 +16,15 @@ import java.time.LocalDateTime;
  * Alerta individual generada por el Monitor de Salud de Oracle cuando una
  * metrica sale del rango NORMAL (seccion 21 de la guia: fecha, hora,
  * componente, variable, valor, umbral, nivel, descripcion).
+ *
+ * <p>Implementa "relacionar las alertas" (paso explicito de la guia general,
+ * antes de "presentar la informacion"): cuando la misma condicion
+ * (componente+variable+nivel) sigue activa en el ciclo siguiente dentro de
+ * {@code VENTANA_PERSISTENCIA}, en vez de insertar una fila identica nueva
+ * se ACTUALIZA esta misma fila (fechaHora avanza, ocurrencias++) - por eso
+ * fechaHora ya no es {@code updatable = false}. {@code fechaPrimera} guarda
+ * cuando empezo la condicion, para poder mostrar "persiste desde hace X" en
+ * el dashboard en vez de tratarla como una alerta nueva cada vez.
  */
 @Entity
 @Table(name = "monitor_alerta")
@@ -26,8 +35,14 @@ public class MonitorAlerta {
     @Column(name = "id_monitor_alerta")
     private Integer idMonitorAlerta;
 
-    @Column(name = "fecha_hora", nullable = false, updatable = false)
+    @Column(name = "fecha_primera", nullable = false, updatable = false)
+    private LocalDateTime fechaPrimera;
+
+    @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
+
+    @Column(name = "ocurrencias", nullable = false)
+    private int ocurrencias = 1;
 
     @Column(name = "componente", nullable = false, length = 20)
     private String componente;
@@ -53,6 +68,9 @@ public class MonitorAlerta {
         if (fechaHora == null) {
             fechaHora = LocalDateTime.now();
         }
+        if (fechaPrimera == null) {
+            fechaPrimera = fechaHora;
+        }
     }
 
     public Integer getIdMonitorAlerta() {
@@ -63,12 +81,28 @@ public class MonitorAlerta {
         this.idMonitorAlerta = idMonitorAlerta;
     }
 
+    public LocalDateTime getFechaPrimera() {
+        return fechaPrimera;
+    }
+
+    public void setFechaPrimera(LocalDateTime fechaPrimera) {
+        this.fechaPrimera = fechaPrimera;
+    }
+
     public LocalDateTime getFechaHora() {
         return fechaHora;
     }
 
     public void setFechaHora(LocalDateTime fechaHora) {
         this.fechaHora = fechaHora;
+    }
+
+    public int getOcurrencias() {
+        return ocurrencias;
+    }
+
+    public void setOcurrencias(int ocurrencias) {
+        this.ocurrencias = ocurrencias;
     }
 
     public String getComponente() {

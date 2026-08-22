@@ -83,6 +83,16 @@ public final class IndicadorOracleUtil {
         };
     }
 
+    /** Nombre de despliegue para el codigo interno de componente ("PROCESOS"/"MEMORIA"/"ARCHIVOS"). */
+    public static String nombreComponente(String codigo) {
+        return switch (codigo) {
+            case "PROCESOS" -> "Procesos";
+            case "MEMORIA" -> "Memoria";
+            case "ARCHIVOS" -> "Archivos";
+            default -> codigo;
+        };
+    }
+
     // ---- Conversion utilizacion cruda -> sub-indice de salud ----
 
     /** salud = 100 - utilizacion, acotado a [0,100]. */

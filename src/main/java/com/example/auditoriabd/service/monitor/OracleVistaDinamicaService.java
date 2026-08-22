@@ -116,6 +116,32 @@ public class OracleVistaDinamicaService {
     }
 
     /**
+     * Cantidad de operaciones prolongadas aun en curso (V$SESSION_LONGOPS,
+     * seccion 6.2/6.3 de la guia: "Operaciones prolongadas: operaciones que
+     * requieren un tiempo considerable"). Esta vista acumula TODAS las
+     * operaciones largas historicas de la sesion (backups, rebuilds,
+     * recoleccion de estadisticas, etc.), no solo las activas, asi que hay
+     * que filtrar las que ya terminaron.
+     *
+     * <p>NO se filtra solo por TIME_REMAINING > 0: probado contra la base
+     * real registrando una operacion sintetica en curso via
+     * DBMS_APPLICATION_INFO.SET_SESSION_LONGOPS (sofar=20, totalwork=100,
+     * es decir 20% completada, claramente NO terminada), Oracle todavia no
+     * habia podido estimar un tiempo restante (no hay suficiente historial
+     * de progreso entre llamadas para calcular una tasa) y devolvio
+     * TIME_REMAINING=0 igual que una operacion ya completa - ese filtro por
+     * si solo la habria excluido incorrectamente. La señal confiable de
+     * "no terminada" es SOFAR != TOTALWORK (una operacion completa siempre
+     * termina reportando sofar=totalwork; totalwork=0 con sofar>0 tambien
+     * cuenta como en curso, para operaciones que aun no conocen su total).
+     */
+    public long contarOperacionesProlongadas() {
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM v$session_longops WHERE sofar != totalwork", Long.class);
+        return total == null ? 0 : total;
+    }
+
+    /**
      * Estadisticas de PGA (V$PGASTAT), claves: "total PGA allocated" (bytes),
      * "total PGA inuse" (bytes), "over allocation count", "cache hit percentage".
      */

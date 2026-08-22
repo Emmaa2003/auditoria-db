@@ -2,7 +2,10 @@ package com.example.auditoriabd.dto.monitor;
 
 import com.example.auditoriabd.entity.monitor.EstadoSalud;
 import com.example.auditoriabd.entity.monitor.MonitorAlerta;
+import com.example.auditoriabd.entity.monitor.MonitorArchivos;
 import com.example.auditoriabd.entity.monitor.MonitorIndice;
+import com.example.auditoriabd.entity.monitor.MonitorMemoria;
+import com.example.auditoriabd.entity.monitor.MonitorProcesos;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,8 +14,10 @@ import java.util.List;
  * Vista completa que consume la pantalla /monitor: el ISBD y su estado
  * "declarado" (segun la escala de la seccion 18), el estado "real" (que puede
  * forzarse a CRITICO por alertas duras, seccion 20), los tres sub-indices con
- * su detalle, las alertas recien generadas en esta medicion y el historico
- * reciente para el grafico de evolucion.
+ * su detalle, las alertas de esta medicion (agrupadas por componente, sección
+ * "relacionar las alertas") y el historico reciente para los graficos de
+ * evolucion - del ISBD combinado, de cada sub-indice por separado y del %
+ * de uso de cada tablespace (sección 23: "¿los tablespaces se están llenando?").
  */
 public class MonitorOracleView {
 
@@ -24,7 +29,12 @@ public class MonitorOracleView {
     private IndicadorComponenteView im;
     private IndicadorComponenteView ia;
     private List<MonitorAlerta> alertasActuales;
+    private List<GrupoAlertasView> gruposAlertas;
     private List<MonitorIndice> historico;
+    private List<MonitorProcesos> historicoProcesos;
+    private List<MonitorMemoria> historicoMemoria;
+    private List<MonitorArchivos> historicoArchivos;
+    private List<HistoricoTablespaceView> historicoTablespaces;
 
     public BigDecimal getIsbd() {
         return isbd;
@@ -90,11 +100,51 @@ public class MonitorOracleView {
         this.alertasActuales = alertasActuales;
     }
 
+    public List<GrupoAlertasView> getGruposAlertas() {
+        return gruposAlertas;
+    }
+
+    public void setGruposAlertas(List<GrupoAlertasView> gruposAlertas) {
+        this.gruposAlertas = gruposAlertas;
+    }
+
     public List<MonitorIndice> getHistorico() {
         return historico;
     }
 
     public void setHistorico(List<MonitorIndice> historico) {
         this.historico = historico;
+    }
+
+    public List<MonitorProcesos> getHistoricoProcesos() {
+        return historicoProcesos;
+    }
+
+    public void setHistoricoProcesos(List<MonitorProcesos> historicoProcesos) {
+        this.historicoProcesos = historicoProcesos;
+    }
+
+    public List<MonitorMemoria> getHistoricoMemoria() {
+        return historicoMemoria;
+    }
+
+    public void setHistoricoMemoria(List<MonitorMemoria> historicoMemoria) {
+        this.historicoMemoria = historicoMemoria;
+    }
+
+    public List<MonitorArchivos> getHistoricoArchivos() {
+        return historicoArchivos;
+    }
+
+    public void setHistoricoArchivos(List<MonitorArchivos> historicoArchivos) {
+        this.historicoArchivos = historicoArchivos;
+    }
+
+    public List<HistoricoTablespaceView> getHistoricoTablespaces() {
+        return historicoTablespaces;
+    }
+
+    public void setHistoricoTablespaces(List<HistoricoTablespaceView> historicoTablespaces) {
+        this.historicoTablespaces = historicoTablespaces;
     }
 }

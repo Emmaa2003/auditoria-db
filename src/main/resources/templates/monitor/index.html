@@ -93,28 +93,67 @@
         </div>
     </div>
 
+    <!-- Alertas correlacionadas: agrupadas por componente ("relacionar las alertas"), con marca
+         de condicion persistente cuando la misma alerta se repite en varios ciclos seguidos. -->
     <div class="card shadow-sm mb-4">
         <div class="card-header">Alertas de esta medición</div>
-        <ul class="list-group list-group-flush" th:if="${!monitor.alertasActuales.isEmpty()}">
-            <li class="list-group-item d-flex justify-content-between align-items-start gap-2" th:each="a : ${monitor.alertasActuales}">
-                <div>
-                    <span class="badge heatmap-cell me-2" th:classappend="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).cssNivelAlerta(a.nivel)}"
-                          th:text="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).textoNivelAlerta(a.nivel)}"></span>
-                    <strong th:text="${a.variable}"></strong>
-                    <span th:text="' · ' + ${a.descripcion}"></span>
+        <div th:if="${!monitor.gruposAlertas.isEmpty()}">
+            <div th:each="grupo, iter : ${monitor.gruposAlertas}" th:classappend="${!iter.last} ? 'border-bottom'">
+                <div class="px-3 pt-3 pb-1 d-flex align-items-center flex-wrap gap-2">
+                    <strong th:text="${grupo.componente}"></strong>
+                    <span class="badge bg-dark" th:if="${grupo.posibleCausaComun}"
+                          th:text="${grupo.alertas.size()} + ' alertas simultáneas · posible causa común'"></span>
                 </div>
-                <small class="text-muted text-nowrap" th:text="${#temporals.format(a.fechaHora, 'HH:mm:ss')}"></small>
-            </li>
-        </ul>
-        <div class="card-body text-muted" th:if="${monitor.alertasActuales.isEmpty()}">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-start gap-2" th:each="a : ${grupo.alertas}">
+                        <div>
+                            <span class="badge heatmap-cell me-2" th:classappend="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).cssNivelAlerta(a.nivel)}"
+                                  th:text="${T(com.example.auditoriabd.service.monitor.IndicadorOracleUtil).textoNivelAlerta(a.nivel)}"></span>
+                            <strong th:text="${a.variable}"></strong>
+                            <span th:text="' · ' + ${a.descripcion}"></span>
+                            <span class="badge bg-secondary ms-2" th:if="${a.ocurrencias > 1}"
+                                  th:text="'Condición persistente · ' + ${a.ocurrencias} + ' ciclos desde ' + ${#temporals.format(a.fechaPrimera, 'HH:mm:ss')}"></span>
+                        </div>
+                        <small class="text-muted text-nowrap" th:text="${#temporals.format(a.fechaHora, 'HH:mm:ss')}"></small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body text-muted" th:if="${monitor.gruposAlertas.isEmpty()}">
             Sin alertas: todos los componentes están dentro de rangos normales.
         </div>
     </div>
 
-    <div class="card shadow-sm mb-5">
+    <div class="card shadow-sm mb-4">
         <div class="card-header">Evolución del ISBD</div>
         <div class="card-body">
             <canvas id="chartHistorico" height="90"></canvas>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">Evolución de Procesos / Memoria / Archivos</div>
+        <div class="card-body">
+            <canvas id="chartSubindices" height="90"></canvas>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Uso de procesos y sesiones (¿están creciendo?)</div>
+                <div class="card-body">
+                    <canvas id="chartProcesos" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">Uso de tablespaces (¿se están llenando?)</div>
+                <div class="card-body">
+                    <canvas id="chartTablespaces" height="120"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -127,7 +166,36 @@
     /*<![CDATA[*/
     const historico = [
         /*[# th:each="h : ${monitor.historico}"]*/
-        { fecha: /*[[${#temporals.format(h.fechaHora, 'dd/MM HH:mm')}]]*/ '', valor: /*[[${h.indiceSalud}]]*/ 0 },
+        {
+            fecha: /*[[${#temporals.format(h.fechaHora, 'dd/MM HH:mm')}]]*/ '',
+            isbd: /*[[${h.indiceSalud}]]*/ 0,
+            ip: /*[[${h.indicadorProcesos}]]*/ 0,
+            im: /*[[${h.indicadorMemoria}]]*/ 0,
+            ia: /*[[${h.indicadorArchivos}]]*/ 0
+        },
+        /*[/]*/
+    ];
+
+    const historicoProcesos = [
+        /*[# th:each="h : ${monitor.historicoProcesos}"]*/
+        {
+            fecha: /*[[${#temporals.format(h.fechaHora, 'dd/MM HH:mm')}]]*/ '',
+            procesos: /*[[${h.usoProcesosPct}]]*/ 0,
+            sesiones: /*[[${h.usoSesionesPct}]]*/ 0
+        },
+        /*[/]*/
+    ];
+
+    const historicoTablespaces = [
+        /*[# th:each="serie : ${monitor.historicoTablespaces}"]*/
+        {
+            nombre: /*[[${serie.nombre}]]*/ '',
+            puntos: [
+                /*[# th:each="p : ${serie.puntos}"]*/
+                { fecha: /*[[${#temporals.format(p.fechaHora, 'dd/MM HH:mm')}]]*/ '', valor: /*[[${p.porcentajeUsado}]]*/ 0 },
+                /*[/]*/
+            ]
+        },
         /*[/]*/
     ];
     /*]]>*/
@@ -138,7 +206,7 @@
             labels: historico.map(h => h.fecha),
             datasets: [{
                 label: 'ISBD',
-                data: historico.map(h => h.valor),
+                data: historico.map(h => h.isbd),
                 borderColor: '#0d6efd',
                 backgroundColor: 'rgba(13,110,253,.15)',
                 fill: true,
@@ -149,6 +217,46 @@
             scales: { y: { beginAtZero: true, max: 100 } },
             plugins: { legend: { display: false } }
         }
+    });
+
+    new Chart(document.getElementById('chartSubindices'), {
+        type: 'line',
+        data: {
+            labels: historico.map(h => h.fecha),
+            datasets: [
+                { label: 'IP (procesos)', data: historico.map(h => h.ip), borderColor: '#198754', tension: .25 },
+                { label: 'IM (memoria)', data: historico.map(h => h.im), borderColor: '#fd7e14', tension: .25 },
+                { label: 'IA (archivos)', data: historico.map(h => h.ia), borderColor: '#6f42c1', tension: .25 }
+            ]
+        },
+        options: { scales: { y: { beginAtZero: true, max: 100 } } }
+    });
+
+    new Chart(document.getElementById('chartProcesos'), {
+        type: 'line',
+        data: {
+            labels: historicoProcesos.map(h => h.fecha),
+            datasets: [
+                { label: '% uso de procesos', data: historicoProcesos.map(h => h.procesos), borderColor: '#0d6efd', tension: .25 },
+                { label: '% uso de sesiones', data: historicoProcesos.map(h => h.sesiones), borderColor: '#20c997', tension: .25 }
+            ]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+
+    const paletaTablespaces = ['#0d6efd', '#dc3545', '#fd7e14', '#198754', '#6f42c1', '#20c997', '#d63384'];
+    new Chart(document.getElementById('chartTablespaces'), {
+        type: 'line',
+        data: {
+            labels: historicoTablespaces.length ? historicoTablespaces[0].puntos.map(p => p.fecha) : [],
+            datasets: historicoTablespaces.map((serie, idx) => ({
+                label: serie.nombre,
+                data: serie.puntos.map(p => p.valor),
+                borderColor: paletaTablespaces[idx % paletaTablespaces.length],
+                tension: .25
+            }))
+        },
+        options: { scales: { y: { beginAtZero: true } } }
     });
 </script>
 </body>
